@@ -62,7 +62,8 @@ const zmq = require('zeromq');
 
 async function connectToTopic(port, topic) {
   const sock = new zmq.Subscriber;
-  sock.connect(`tcp://localhost:${port}`);
+  const proxyIp = '127.0.0.1';
+  sock.connect(`tcp://${proxyIp}:${port}`);
   sock.subscribe(topic);
 
   console.log(`Subscriber connected to port ${port} for topic ${topic}`);
@@ -70,7 +71,7 @@ async function connectToTopic(port, topic) {
   for await (const [receivedTopic, msg] of sock) {
     console.log(`Received a message on port ${port}:`);
     console.log('Topic:', receivedTopic.toString());
-    console.log('Message:', msg.toString('hex'));
+    console.log('First 100 bytes:', msg.slice(0, 100).toString('hex'));
   }
 }
 
