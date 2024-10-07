@@ -1,0 +1,26 @@
+version: '3'
+services:
+  bitcoind-zmq-proxy:
+    build: .
+    ports:
+      - "28327:28327"
+      - "28328:28328"
+      - "28329:28329"
+      - "28330:28330"
+      - "28331:28331"
+      - "28332:28332"
+    environment:
+      - BITCOIND_HOST=your_bitcoind_host # remote host name, ex. 'bcntplorcd.b.voltageapp.io'
+      - BITCOIND_PORT=28332
+      - ZMQ_HOST=your_zmq_host
+      - ZMQ_RAWBLOCK_PORT=28331
+      - ZMQ_RAWTX_PORT=28330
+      - ZMQ_HASHBLOCK_PORT=28329
+      - ZMQ_HASHTX_PORT=28328
+      - ZMQ_SEQUENCE_PORT=28327
+    networks:
+      - zmq-network
+
+networks:
+  zmq-network:
+    driver: bridge
