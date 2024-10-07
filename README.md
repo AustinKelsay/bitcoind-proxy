@@ -26,7 +26,7 @@ The TCP proxy setup in this project serves multiple purposes:
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/bitcoind-zmq-proxy.git
+   git clone https://github.com/austinkelsat/bitcoind-zmq-proxy.git
    cd bitcoind-zmq-proxy
    ```
 
