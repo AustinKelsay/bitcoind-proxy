@@ -84,7 +84,6 @@ class TCPProxy:
                         data = source.recv(4096)
                         if not data:
                             break
-                        print(f"{direction} forwarding {len(data)} bytes")
                         destination.sendall(data)
                 except Exception as e:
                     print(f"Error in {direction} forward: {e}")
