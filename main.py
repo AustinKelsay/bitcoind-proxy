@@ -9,6 +9,9 @@ import threading
 import select
 import time
 import os
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import requests
+from urllib.parse import urlparse
 
 class TCPProxy:
 
@@ -186,10 +189,37 @@ class ZMQHandler:
         self.loop.stop()
 
 
+class RPCReverseProxy(BaseHTTPRequestHandler):
+    def do_POST(self):
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length)
+        
+        url = f"https://{os.environ['BITCOIND_HOST']}:{os.environ['RPC_PORT']}"
+        headers = {
+            'content-type': 'text/plain;',
+        }
+        
+        auth = (os.environ['RPC_USER'], os.environ['RPC_PASSWORD'])
+        
+        response = requests.post(url, data=post_data, headers=headers, auth=auth, verify=False)
+        
+        self.send_response(response.status_code)
+        for key, value in response.headers.items():
+            self.send_header(key, value)
+        self.end_headers()
+        self.wfile.write(response.content)
+
+def run_rpc_server(server_class=HTTPServer, handler_class=RPCReverseProxy, port=8332):
+    server_address = ('', port)
+    httpd = server_class(server_address, handler_class)
+    print(f"Starting RPC reverse proxy on port {port}")
+    httpd.serve_forever()
+
 if __name__ == "__main__":
     hostname = os.environ.get("BITCOIND_HOST")
     port = int(os.environ.get("BITCOIND_PORT", 28332))
     zmq_host = os.environ.get("ZMQ_HOST", "127.0.0.1")  # Default to localhost if not specified
+    rpc_port = int(os.environ.get("RPC_PORT", 8332))
 
     zmq_subscriptions = {
         "rawblock": int(os.environ.get("ZMQ_RAWBLOCK_PORT", 28331)),
@@ -210,6 +240,10 @@ if __name__ == "__main__":
         thread = threading.Thread(target=zmq_handler.start)
         thread.start()
         zmq_threads.append(thread)
+
+    # Start the RPC reverse proxy
+    rpc_thread = threading.Thread(target=run_rpc_server, args=(HTTPServer, RPCReverseProxy, rpc_port))
+    rpc_thread.start()
 
     try:
         signal.pause()

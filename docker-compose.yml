@@ -9,6 +9,7 @@ services:
       - "28330:28330"
       - "28331:28331"
       - "28332:28332"
+      - "8332:8332"
     environment:
       - BITCOIND_HOST=your_bitcoind_host # remote host name, ex. 'bcntplorcd.b.voltageapp.io'
       - BITCOIND_PORT=28332
@@ -18,6 +19,9 @@ services:
       - ZMQ_HASHBLOCK_PORT=28329
       - ZMQ_HASHTX_PORT=28328
       - ZMQ_SEQUENCE_PORT=28327
+      - RPC_PORT=8332
+      - RPC_USER=username
+      - RPC_PASSWORD=password
     networks:
       - zmq-network
 
